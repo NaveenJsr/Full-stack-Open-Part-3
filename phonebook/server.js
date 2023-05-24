@@ -75,7 +75,25 @@ app.delete( "/api/persons/:id", ( req, res ) =>
 app.post( "/api/persons", ( req, res ) =>
 {
     const person = req.body
-    console.log( person )
+
+    if ( !req.body.name || !req.body.number )
+    {
+        return res.status( 400 ).send( { error: "Invalid Input" } )
+    }
+    let found = false
+    data.forEach( ( p ) =>
+    {
+        if ( p.name === req.body.name )
+        {
+            found = true
+        }
+    } )
+
+    if ( found )
+    {
+        return res.status( 400 ).send( { error: "name must be unique" } )
+    }
+
     person.id = Math.floor( Math.random() * 1000000 )
 
     data = data.concat( person )
