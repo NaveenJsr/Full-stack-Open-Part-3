@@ -1,6 +1,6 @@
 const express = require( 'express' )
 const app = express()
-
+app.use( express.json() )
 let data = [
     {
         "id": 1,
@@ -69,5 +69,17 @@ app.delete( "/api/persons/:id", ( req, res ) =>
     console.log( filteredData )
 
     res.status( 204 ).send( 'Deleted Successfully' )
+
+} )
+
+app.post( "/api/persons", ( req, res ) =>
+{
+    const person = req.body
+    console.log( person )
+    person.id = Math.floor( Math.random() * 1000000 )
+
+    data = data.concat( person )
+
+    res.send( data )
 
 } )
