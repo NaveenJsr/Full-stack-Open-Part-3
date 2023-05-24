@@ -43,3 +43,20 @@ app.get( "/api/info", ( req, res ) =>
 
     res.send( `<p>Phonebook has info for ${ count } people </p> <p> ${ currentTime } </p>` )
 } )
+
+app.get( "/api/persons/:id", ( req, res ) =>
+{
+    let id = Number( req.params.id )
+
+    let person = data.find( ( p ) => p.id === id )
+
+    // console.log(person)
+
+    if ( person )
+    {
+        return res.send( person )
+    }
+
+    res.status( 404 ).send( `Data not found` )
+
+} )
