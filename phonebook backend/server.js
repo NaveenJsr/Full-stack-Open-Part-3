@@ -20,28 +20,7 @@ morgan.token( 'payload', ( req, res ) => req.method === 'POST' ? JSON.stringify(
 app.use( morgan( ':method :url :status :res[content-length] - :response-time ms :payload' ) )
 
 
-let data = [
-    {
-        "id": 1,
-        "name": "Arto Hellas",
-        "number": "040-123456"
-    },
-    {
-        "id": 2,
-        "name": "Ada Lovelace",
-        "number": "39-44-5323523"
-    },
-    {
-        "id": 3,
-        "name": "Dan Abramov",
-        "number": "12-43-234345"
-    },
-    {
-        "id": 4,
-        "name": "Mary Poppendieck",
-        "number": "39-23-6423122"
-    }
-]
+
 
 const PORT = process.env.PORT || 3001
 app.listen( PORT, () =>
@@ -58,37 +37,63 @@ app.get( "/api/persons", async ( req, res ) =>
 
 app.get( "/api/info", ( req, res ) =>
 {
-    let count = data.length
-    let currentTime = new Date()
+    phoneBookModel.countDocuments( {} ).then( ( count ) =>
+    {
+        let currentTime = new Date()
+        res.send( `<p>Phonebook has info for ${ count } people </p> <p> ${ currentTime } </p>` )
+    } )
 
-    res.send( `<p>Phonebook has info for ${ count } people </p> <p> ${ currentTime } </p>` )
 } )
 
-app.get( "/api/persons/:id", ( req, res ) =>
+app.get( "/api/persons/:id", ( req, res, next ) =>
 {
-    let id = Number( req.params.id )
+    let id = req.params.id
 
-    let person = data.find( ( p ) => p.id === id )
-
-    // console.log(person)
-
-    if ( person )
+    phoneBookModel.findOne( { _id: id } ).then( ( data ) =>
     {
-        return res.send( person )
-    }
+        if ( data )
+        {
+            return res.send( data )
+        }
+        else
+        {
+            return res.status( 404 ).end()
+        }
+    } )
+        .catch( ( error ) =>
+        {
+            next( error )
+        } )
 
-    res.status( 404 ).send( `Data not found` )
+} )
 
+app.put( "/api/persons/:id", ( req, res, next ) =>
+{
+    let id = req.params.id
+    let payload = req.body
+    phoneBookModel.findOneAndUpdate( { _id: id }, payload, { new: true } ).then( ( data ) =>
+    {
+        console.log( data )
+        res.send( data )
+    } )
+        .catch( ( error ) =>
+        {
+            next( error )
+        } )
 } )
 
 app.delete( "/api/persons/:id", ( req, res ) =>
 {
-    let id = Number( req.params.id )
+    let id = req.params.id
 
-    let filteredData = data.filter( ( p ) => p.id !== id )
-    console.log( filteredData )
-    data = filteredData
-    res.status( 204 ).send( 'Deleted Successfully' )
+    phoneBookModel.findOneAndDelete( { _id: id } ).then( () =>
+    {
+        res.status( 204 ).send( 'Deleted Successfully' )
+    } )
+        .catch( ( error ) =>
+        {
+            next( error )
+        } )
 
 } )
 
@@ -100,20 +105,22 @@ app.post( "/api/persons", async ( req, res ) =>
     {
         return res.status( 400 ).send( { error: "Invalid Input" } )
     }
-    let found = false
-    // data.forEach((p)=>{
-    //     if(p.name===req.body.name){
-    //         found=true
-    //     }
-    // })
-
-    if ( found )
-    {
-        return res.status( 400 ).send( { error: "name must be unique" } )
-    }
 
     let newPerson = await phoneBookModel.create( person )
-    // console.log(newPerson)
     res.send( newPerson )
 
 } )
+
+
+//Error handling Middleware
+const errorHandler = ( error, req, res, next ) =>
+{
+    console.log( error.name )
+    if ( error.name === 'CastError' )
+    {
+        return res.status( 400 ).send( { error: "malformatted id" } )
+    }
+    next( error )
+}
+
+app.use( errorHandler )
