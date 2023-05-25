@@ -32,21 +32,26 @@ const App = () =>
         )
         {
           let payload = { ...p, number: number };
-          apiService.updatePhone( payload ).then( ( response ) =>
-          {
-            let allPerson = [ ...persons ];
-            allPerson.forEach( ( c ) =>
+          apiService.updatePhone( payload )
+            .then( ( response ) =>
             {
-              if ( c.id === response.id )
+              let allPerson = [ ...persons ];
+              allPerson.forEach( ( c ) =>
               {
-                c.number = response.number;
-              }
-            } );
-            setPersons( allPerson );
-            setNewName( "" );
-            setNumber( "" );
-            notifyOnScreen( "success", `${ newName }'s phone updated successfully` )
-          } );
+                if ( c.id === response.id )
+                {
+                  c.number = response.number;
+                }
+              } );
+              setPersons( allPerson );
+              setNewName( "" );
+              setNumber( "" );
+              notifyOnScreen( "success", `${ newName }'s phone updated successfully` )
+            } )
+            .catch( ( error ) =>
+            {
+              notifyOnScreen( 'error', error.response.data.error )
+            } )
         }
       }
     } );
@@ -56,13 +61,18 @@ const App = () =>
       return;
     }
 
-    apiService.savePhone( { name: newName, number: number } ).then( ( response ) =>
-    {
-      setPersons( [ ...persons, response ] );
-      notifyOnScreen( "success", `Added ${ newName }` )
-      setNewName( "" );
-      setNumber( "" );
-    } );
+    apiService.savePhone( { name: newName, number: number } )
+      .then( ( response ) =>
+      {
+        setPersons( [ ...persons, response ] );
+        notifyOnScreen( "success", `Added ${ newName }` )
+        setNewName( "" );
+        setNumber( "" );
+      } )
+      .catch( ( error ) =>
+      {
+        notifyOnScreen( 'error', error.response.data.error )
+      } )
   };
 
   const notifyOnScreen = ( type, message ) =>
