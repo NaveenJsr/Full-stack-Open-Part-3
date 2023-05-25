@@ -4,7 +4,8 @@ const app = express()
 
 //Middleware
 app.use( express.json() )
-app.use( morgan( 'tiny' ) )
+morgan.token( 'payload', ( req, res ) => req.method === 'POST' ? JSON.stringify( req.body ) : null )
+app.use( morgan( ':method :url :status :res[content-length] - :response-time ms :payload' ) )
 
 
 let data = [
