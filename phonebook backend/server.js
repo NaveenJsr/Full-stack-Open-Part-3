@@ -1,8 +1,10 @@
 const express = require( 'express' )
 const morgan = require( 'morgan' )
+const cors = require( "cors" )
 const app = express()
 
 //Middleware
+app.use( cors() )
 app.use( express.json() )
 morgan.token( 'payload', ( req, res ) => req.method === 'POST' ? JSON.stringify( req.body ) : null )
 app.use( morgan( ':method :url :status :res[content-length] - :response-time ms :payload' ) )
@@ -31,7 +33,7 @@ let data = [
     }
 ]
 
-const PORT = 3001
+const PORT = process.env.PORT || 3001
 app.listen( PORT, () =>
 {
     console.log( `Server is started on port ${ PORT }` )
@@ -40,6 +42,7 @@ app.listen( PORT, () =>
 
 app.get( "/api/persons", ( req, res ) =>
 {
+    console.log( data )
     res.send( data )
 } )
 
@@ -74,7 +77,7 @@ app.delete( "/api/persons/:id", ( req, res ) =>
 
     let filteredData = data.filter( ( p ) => p.id !== id )
     console.log( filteredData )
-
+    data = filteredData
     res.status( 204 ).send( 'Deleted Successfully' )
 
 } )
@@ -104,7 +107,6 @@ app.post( "/api/persons", ( req, res ) =>
     person.id = Math.floor( Math.random() * 1000000 )
 
     data = data.concat( person )
-
-    res.send( data )
+    res.send( person )
 
 } )

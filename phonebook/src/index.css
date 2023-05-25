@@ -1,0 +1,16 @@
+.notify{
+    padding: 10px;
+    background-color: rgb(216, 215, 215);
+    margin-bottom: 10px;
+    font-size: 1.25rem;
+}
+
+.error{
+    border: 2px solid red;
+    color: red;
+}
+
+.success{
+    border: 2px solid green;
+    color: green;
+}
