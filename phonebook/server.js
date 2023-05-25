@@ -1,6 +1,12 @@
 const express = require( 'express' )
+const morgan = require( 'morgan' )
 const app = express()
+
+//Middleware
 app.use( express.json() )
+app.use( morgan( 'tiny' ) )
+
+
 let data = [
     {
         "id": 1,
