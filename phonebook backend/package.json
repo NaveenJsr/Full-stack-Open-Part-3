@@ -17,5 +17,8 @@
     "express": "^4.18.2",
     "mongoose": "^6.9.2",
     "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.34.0"
   }
 }
