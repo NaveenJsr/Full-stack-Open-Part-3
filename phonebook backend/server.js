@@ -1,7 +1,17 @@
 const express = require( 'express' )
 const morgan = require( 'morgan' )
 const cors = require( "cors" )
+require( "dotenv" ).config()
 const app = express()
+const mongoose = require( "mongoose" )
+mongoose.set( 'strictQuery', false )
+mongoose.connect( process.env.MONGO_URI, () =>
+{
+    console.log( "db is connected" )
+} )
+
+
+const phoneBookModel = require( "./model" )
 
 //Middleware
 app.use( cors() )
@@ -40,10 +50,10 @@ app.listen( PORT, () =>
 } )
 
 
-app.get( "/api/persons", ( req, res ) =>
+app.get( "/api/persons", async ( req, res ) =>
 {
-    console.log( data )
-    res.send( data )
+    let allPhoneData = await phoneBookModel.find( {} )
+    res.send( allPhoneData )
 } )
 
 app.get( "/api/info", ( req, res ) =>
@@ -82,7 +92,7 @@ app.delete( "/api/persons/:id", ( req, res ) =>
 
 } )
 
-app.post( "/api/persons", ( req, res ) =>
+app.post( "/api/persons", async ( req, res ) =>
 {
     const person = req.body
 
@@ -91,22 +101,19 @@ app.post( "/api/persons", ( req, res ) =>
         return res.status( 400 ).send( { error: "Invalid Input" } )
     }
     let found = false
-    data.forEach( ( p ) =>
-    {
-        if ( p.name === req.body.name )
-        {
-            found = true
-        }
-    } )
+    // data.forEach((p)=>{
+    //     if(p.name===req.body.name){
+    //         found=true
+    //     }
+    // })
 
     if ( found )
     {
         return res.status( 400 ).send( { error: "name must be unique" } )
     }
 
-    person.id = Math.floor( Math.random() * 1000000 )
-
-    data = data.concat( person )
-    res.send( person )
+    let newPerson = await phoneBookModel.create( person )
+    // console.log(newPerson)
+    res.send( newPerson )
 
 } )
